@@ -270,15 +270,23 @@ Transform LookAt(const Point &pos, const Point &look, const Vector &up) {
 
 
 BBox Transform::operator()(const BBox &b) const {
-    const Transform &M = *this;
-    BBox ret(        M(Point(b.pMin.x, b.pMin.y, b.pMin.z)));
-    ret = Union(ret, M(Point(b.pMax.x, b.pMin.y, b.pMin.z)));
-    ret = Union(ret, M(Point(b.pMin.x, b.pMax.y, b.pMin.z)));
-    ret = Union(ret, M(Point(b.pMin.x, b.pMin.y, b.pMax.z)));
-    ret = Union(ret, M(Point(b.pMin.x, b.pMax.y, b.pMax.z)));
-    ret = Union(ret, M(Point(b.pMax.x, b.pMax.y, b.pMin.z)));
-    ret = Union(ret, M(Point(b.pMax.x, b.pMin.y, b.pMax.z)));
-    ret = Union(ret, M(Point(b.pMax.x, b.pMax.y, b.pMax.z)));
+    BBox ret;
+    float a1, a2;
+    
+    for(int i=0 ; i<3 ; i++)
+    {
+        ret.pMin[i] = m.m[i][3];
+        ret.pMax[i] = m.m[i][3];
+
+        for(int j=0 ; j<3 ; j++)
+        {
+            a1 = m.m[i][j] * b.pMin[j];
+            a2 = m.m[i][j] * b.pMax[j];
+            ret.pMin[i] += min(a1, a2);
+            ret.pMax[i] += max(a1, a2);
+        }
+    }
+
     return ret;
 }
 
